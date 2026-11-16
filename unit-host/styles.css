@@ -26,3 +26,9 @@
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .mobile-sidebar{display:none}.mobile-nav-close{position:absolute;top:18px;right:11px}
 @media(max-width:680px){.desktop-sidebar{display:none}.mobile-sidebar{display:flex;transform:none;z-index:60;padding-top:22px;max-height:100dvh}.mobile-sidebar .sidebar-brand{padding-right:32px}.mobile-backdrop{z-index:59}.mobile-sidebar .sidebar-user{padding-bottom:20px}}
+
+@media(max-width:680px){
+.discord-shell{max-height:none;min-height:590px;grid-template-rows:auto minmax(430px,1fr)}
+.channel-sidebar{flex-direction:row;align-content:flex-start}.channel{margin:0}
+.chat-main{min-height:430px}.messages{min-height:260px;max-height:480px}.guild-title{flex-basis:100%}
+}
