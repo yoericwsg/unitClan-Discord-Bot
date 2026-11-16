@@ -9,6 +9,6 @@ This site imports the following packages from esm.sh. Their source and license n
 - CodeMirror 6 — MIT. https://github.com/codemirror/dev/blob/main/LICENSE
 - DM Sans, Space Grotesk, JetBrains Mono — SIL Open Font License 1.1, supplied by Google Fonts.
 
-CodeMirror dependencies are resolved by the CDN with common state/view versions. Deployment validation records actual import and browser behavior.
+CodeMirror and Lezer dependencies are pinned in one import map. All imports share the same package instances. Deployment validation records actual import and browser behavior.
 
 No copied shadcn block source is included; its dashboard composition informed the original layout.

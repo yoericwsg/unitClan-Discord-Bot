@@ -39,14 +39,14 @@ export function textDownload(name,text,type='text/plain') {
 }
 export async function copyText(text) {try{await navigator.clipboard.writeText(text);toast.success('Copied to clipboard');}catch{toast.error('Clipboard unavailable. Select and copy the text manually.');}}
 export function CodeEditor({value,language,onChange}) {
-  const parent=useRef(null),view=useRef(null),latest=useRef(onChange);
-  const [error,setError]=useState(false);latest.current=onChange;
+  const parent=useRef(null),view=useRef(null),latest=useRef(onChange),latestValue=useRef(value);
+  const [error,setError]=useState(false);latest.current=onChange;latestValue.current=value;
   useEffect(()=>{
-    let active=true;
+    let active=true;setError(false);
     Promise.all([
-      import('https://esm.sh/codemirror@6.0.1?deps=@codemirror/state@6.5.2,@codemirror/view@6.38.6'),
-      import('https://esm.sh/@codemirror/lang-javascript@6.2.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.38.6'),
-      import('https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.5.2,@codemirror/view@6.38.6')
+      import('codemirror'),
+      import('@codemirror/lang-javascript'),
+      import('@codemirror/lang-python')
     ]).then(([cm,js,py])=>{
       if(!active||!parent.current)return;
       const theme=cm.EditorView.theme({
@@ -58,9 +58,9 @@ export function CodeEditor({value,language,onChange}) {
         '&.cm-focused .cm-selectionBackground, .cm-selectionBackground':{backgroundColor:'#354540'},
         '.cm-scroller':{overflow:'auto'},'.cm-panels':{backgroundColor:'#202735',color:'#dce3ef'}
       },{dark:true});
-      const extensions=[cm.basicSetup,theme,language==='python'?py.python():js.javascript(),cm.EditorView.updateListener.of(update=>{if(update.docChanged)latest.current(update.state.doc.toString());})];
-      view.current=new cm.EditorView({doc:value,extensions,parent:parent.current});
-    }).catch(()=>{if(active)setError(true);});
+      const extensions=[cm.basicSetup,cm.EditorView.contentAttributes.of({'aria-label':'Code editor'}),theme,language==='python'?py.python():js.javascript(),cm.EditorView.updateListener.of(update=>{if(update.docChanged)latest.current(update.state.doc.toString());})];
+      view.current=new cm.EditorView({doc:latestValue.current,extensions,parent:parent.current});
+    }).catch(err=>{console.error('CodeMirror could not load',err);if(active)setError(true);});
     return()=>{active=false;view.current?.destroy();view.current=null;};
   },[language]);
   useEffect(()=>{if(view.current&&view.current.state.doc.toString()!==value)view.current.dispatch({changes:{from:0,to:view.current.state.doc.length,insert:value}});},[value]);
