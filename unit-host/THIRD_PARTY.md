@@ -6,7 +6,7 @@ This site imports the following packages from esm.sh. Their source and license n
 - Base UI 1.9.0 — MIT, MUI and contributors. https://github.com/mui/base-ui/blob/master/LICENSE
 - Sonner 2.0.7 — MIT. https://github.com/emilkowalski/sonner/blob/main/LICENSE
 - Lucide React 0.468.0 — ISC. https://github.com/lucide-icons/lucide/blob/main/LICENSE
-- CodeMirror 6 — MIT. https://github.com/codemirror/dev/blob/main/LICENSE
+- CodeMirror 6 and One Dark theme 6.1.3 — MIT. https://github.com/codemirror/dev/blob/main/LICENSE
 - DM Sans, Space Grotesk, JetBrains Mono — SIL Open Font License 1.1, supplied by Google Fonts.
 
 CodeMirror and Lezer dependencies are pinned in one import map. All imports share the same package instances. Deployment validation records actual import and browser behavior.

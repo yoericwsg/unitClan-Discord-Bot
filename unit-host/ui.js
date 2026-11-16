@@ -46,8 +46,9 @@ export function CodeEditor({value,language,onChange}) {
     Promise.all([
       import('codemirror'),
       import('@codemirror/lang-javascript'),
-      import('@codemirror/lang-python')
-    ]).then(([cm,js,py])=>{
+      import('@codemirror/lang-python'),
+      import('@codemirror/theme-one-dark')
+    ]).then(([cm,js,py,dark])=>{
       if(!active||!parent.current)return;
       const theme=cm.EditorView.theme({
         '&':{backgroundColor:'#10141c',color:'#cad2e3',height:'100%',fontSize:'12px'},
@@ -58,7 +59,7 @@ export function CodeEditor({value,language,onChange}) {
         '&.cm-focused .cm-selectionBackground, .cm-selectionBackground':{backgroundColor:'#354540'},
         '.cm-scroller':{overflow:'auto'},'.cm-panels':{backgroundColor:'#202735',color:'#dce3ef'}
       },{dark:true});
-      const extensions=[cm.basicSetup,cm.EditorView.contentAttributes.of({'aria-label':'Code editor'}),theme,language==='python'?py.python():js.javascript(),cm.EditorView.updateListener.of(update=>{if(update.docChanged)latest.current(update.state.doc.toString());})];
+      const extensions=[cm.basicSetup,cm.EditorView.contentAttributes.of({'aria-label':'Code editor'}),dark.oneDark,theme,language==='python'?py.python():js.javascript(),cm.EditorView.updateListener.of(update=>{if(update.docChanged)latest.current(update.state.doc.toString());})];
       view.current=new cm.EditorView({doc:latestValue.current,extensions,parent:parent.current});
     }).catch(err=>{console.error('CodeMirror could not load',err);if(active)setError(true);});
     return()=>{active=false;view.current?.destroy();view.current=null;};
@@ -66,4 +67,15 @@ export function CodeEditor({value,language,onChange}) {
   useEffect(()=>{if(view.current&&view.current.state.doc.toString()!==value)view.current.dispatch({changes:{from:0,to:view.current.state.doc.length,insert:value}});},[value]);
   if(error)return h('textarea',{className:'editor-fallback','aria-label':'Code editor',spellCheck:false,value,onChange:e=>onChange(e.target.value)});
   return h('div',{className:'code-editor',ref:parent,'aria-label':'Code editor'});
+}
+
+export function ResponsiveSidebar({open,onOpenChange,finalFocus,children}) {
+  return h(React.Fragment,null,
+    h('aside',{className:'sidebar desktop-sidebar'},children),
+    h(Dialog.Root,{open,onOpenChange},h(Dialog.Portal,null,
+      h(Dialog.Backdrop,{className:'mobile-backdrop'}),
+      h(Dialog.Popup,{className:'sidebar mobile-sidebar',finalFocus},
+        h(Dialog.Title,{className:'sr-only'},'Workspace navigation'),
+        h(Dialog.Close,{className:'icon-button mobile-nav-close','aria-label':'Close navigation'},h(Icon,{name:'x'})),
+        children))));
 }

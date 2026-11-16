@@ -1,7 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Toaster,toast} from 'sonner';
-import {h,Icon,Button,Badge,Brand,Avatar,Modal,Field,Note,backendToast} from './ui.js';
+import {h,Icon,Button,Badge,Brand,Avatar,Modal,Field,Note,backendToast,ResponsiveSidebar} from './ui.js';
 import {Overview,Deployments,Project,Templates,Studio,Servers,BotProfile,Backups,Plans,Settings,Docs} from './pages.js';
 import {initialProjects,TEMPLATES,templateFiles,detectRuntime,nextRenewal,PLAN,safeFileName} from './model.js';
 
@@ -60,6 +60,8 @@ function App() {
   function updateProject(next){setProjects(ps=>ps.map(p=>p.id===next.id?next:p));}
   function checkpoint(p){setBackups(bs=>[{id:Date.now().toString(),time:new Date().toISOString(),project:structuredClone(p)},...bs].slice(0,20));addActivity('Checkpoint created for '+p.name);}
   function restore(b){if(!projects.some(p=>p.id===b.project.id)){toast.error('Project is no longer in this preview');return;}updateProject(structuredClone(b.project));addActivity('Checkpoint restored for '+b.project.name);toast.success('Preview checkpoint restored');}
+  const navigationTrigger=useRef(null),searchInput=useRef(null);
+  useEffect(()=>{function shortcuts(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&screen==='app'){e.preventDefault();searchInput.current?.focus();}if(e.key==='Escape')setSearch('');}window.addEventListener('keydown',shortcuts);return()=>window.removeEventListener('keydown',shortcuts);},[screen]);
   const project=projects.find(p=>p.id===projectId)||projects[0];
   const navMatches=NAV.filter(([,label])=>label.toLowerCase().includes(search.toLowerCase()));
   const projectMatches=projects.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
@@ -78,8 +80,7 @@ function App() {
   return h(React.Fragment,null,h(Toaster,{theme:'dark',position:'bottom-right',richColors:true,closeButton:true}),
     screen==='landing'?h(Landing,{enter,tour:()=>setTour(true)}):
     h('div',{className:'app-shell'},
-      mobile&&h('button',{className:'mobile-backdrop','aria-label':'Close navigation',onClick:()=>setMobile(false)}),
-      h('aside',{className:'sidebar '+(mobile?'open':'')},h('div',{className:'sidebar-brand'},h(Brand,{onClick:()=>{setScreen('landing');location.hash='';}}),h(Badge,null,'BETA')),
+      h(ResponsiveSidebar,{open:mobile,onOpenChange:setMobile,finalFocus:navigationTrigger},h('div',{className:'sidebar-brand'},h(Brand,{onClick:()=>{setScreen('landing');location.hash='';}}),h(Badge,null,'BETA')),
         h('button',{className:'workspace-switch',onClick:()=>navigate('overview')},h(Avatar,{name:'W',tone:'lavender',size:31}),h('span',null,h('strong',null,'My workspace'),h('small',null,'Personal · Free preview')),h(Icon,{name:'down',size:15})),
         h('div',{className:'nav-label'},'WORKSPACE'),h('nav',{'aria-label':'Workspace navigation'},...NAV.map(([id,label,icon])=>h('button',{key:id,className:'nav-item '+(page===id?'active':''),onClick:()=>navigate(id)},h(Icon,{name:icon,size:18}),label,id==='studio'&&h('span',{className:'nav-tag'},'FREE'),id==='deployments'&&h('span',{className:'nav-count'},projects.length)))),
         h('div',{className:'nav-label projects-label'},'YOUR PROJECTS',h(Button,{variant:'icon',icon:'plus','aria-label':'New project',onClick:()=>setNewOpen(true)})),
@@ -88,8 +89,8 @@ function App() {
           h('button',{className:'nav-item '+(page==='settings'?'active':''),onClick:()=>navigate('settings')},h(Icon,{name:'settings',size:18}),'Settings'),
           h('button',{className:'nav-item '+(page==='docs'?'active':''),onClick:()=>navigate('docs')},h(Icon,{name:'book',size:18}),'Quick start'),
           h('button',{className:'sidebar-user',onClick:()=>setHelp(true)},h(Avatar,{name:'Y',size:32}),h('div',null,h('strong',null,'Your workspace'),h('small',null,'Static preview session')),h(Icon,{name:'more',size:18})))),
-      h('div',{className:'app-main'},h('header',{className:'topbar'},h('div',{className:'breadcrumbs'},h(Button,{variant:'icon',icon:'menu','aria-label':'Open navigation',className:'mobile-menu',onClick:()=>setMobile(true)}),h('span',null,'My workspace'),h(Icon,{name:'right',size:13}),h('strong',null,page==='project'?project.name:NAV.find(n=>n[0]===page)?.[1]||({plans:'Free plan',settings:'Settings',docs:'Quick start'}[page]))),
-        h('div',{className:'topbar-actions'},h('div',{className:'global-search'},h(Icon,{name:'search',size:15}),h('input',{'aria-label':'Search workspace',placeholder:'Search anything…',value:search,onChange:e=>setSearch(e.target.value)}),h('kbd',null,h(Icon,{name:'command',size:11}),' K'),search&&h('div',{className:'search-results'},...navMatches.map(([id,label,icon])=>h('button',{key:id,onClick:()=>navigate(id)},h(Icon,{name:icon,size:15}),label)),...projectMatches.map(p=>h('button',{key:p.id,onClick:()=>navigate('project',p.id)},h(Icon,{name:'bot',size:15}),p.name)),!navMatches.length&&!projectMatches.length&&h('p',null,'No matches'))),h('span',{className:'preview-indicator'},h('span',{className:'status-dot amber'}),'Static preview'),h(Button,{variant:'icon',icon:'help','aria-label':'About this preview',onClick:()=>setHelp(true)}))),
+      h('div',{className:'app-main'},h('header',{className:'topbar'},h('div',{className:'breadcrumbs'},h(Button,{variant:'icon',icon:'menu','aria-label':'Open navigation',ref:navigationTrigger,className:'mobile-menu',onClick:()=>setMobile(true)}),h('span',null,'My workspace'),h(Icon,{name:'right',size:13}),h('strong',null,page==='project'?project.name:NAV.find(n=>n[0]===page)?.[1]||({plans:'Free plan',settings:'Settings',docs:'Quick start'}[page]))),
+        h('div',{className:'topbar-actions'},h('div',{className:'global-search'},h(Icon,{name:'search',size:15}),h('input',{ref:searchInput,'aria-label':'Search workspace',placeholder:'Search anything…',value:search,onChange:e=>setSearch(e.target.value)}),h('kbd',null,h(Icon,{name:'command',size:11}),' K'),search&&h('div',{className:'search-results'},...navMatches.map(([id,label,icon])=>h('button',{key:id,onClick:()=>navigate(id)},h(Icon,{name:icon,size:15}),label)),...projectMatches.map(p=>h('button',{key:p.id,onClick:()=>navigate('project',p.id)},h(Icon,{name:'bot',size:15}),p.name)),!navMatches.length&&!projectMatches.length&&h('p',null,'No matches'))),h('span',{className:'preview-indicator'},h('span',{className:'status-dot amber'}),'Static preview'),h(Button,{variant:'icon',icon:'help','aria-label':'About this preview',onClick:()=>setHelp(true)}))),
         h('main',{className:'workspace-content'},content),
         h('footer',{className:'workspace-footer'},h('span',null,h('span',{className:'status-dot amber'}),'Backend not connected'),h('span',null,'Made for your next idea.')))),
     h(NewDeployment,{open:newOpen,close:()=>setNewOpen(false),createProject,projects}),
