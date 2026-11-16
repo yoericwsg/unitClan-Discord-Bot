@@ -32,3 +32,6 @@
 .channel-sidebar{flex-direction:row;align-content:flex-start}.channel{margin:0}
 .chat-main{min-height:430px}.messages{min-height:260px;max-height:480px}.guild-title{flex-basis:100%}
 }
+
+.code-editor-shell{position:relative;display:flex;flex-direction:column;flex:1;min-height:485px}.editor-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:12px;color:#a5b4c8;background:#10141c;z-index:2}.editor-loading svg{color:#a5f3bf}
+@media(max-width:680px){.code-editor-shell{min-height:410px}}

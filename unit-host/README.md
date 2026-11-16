@@ -38,3 +38,22 @@ References:
 - https://docs.discord.com/developers/topics/permissions
 
 See THIRD_PARTY.md for dependency licenses.
+
+## Validation
+The published preview returned HTTP 200. All authored JavaScript passed Acorn syntax parsing. Model checks covered runtime detection, file names, permission bits, three deployment slots, and calendar-month renewal clamping.
+
+Observed in the live browser:
+- CodeMirror JavaScript/Python rendering; edit, save, search, undo and redo.
+- Nested file creation and checkpoint restore.
+- Studio generated a third Python project and prevented a fourth deployment.
+- Message drafts remained labelled NOT SENT; read-only mode locked chat, role assignments, and ban controls.
+- Preview role creation/removal and identity name save.
+- Mobile navigation dialog focus, Escape dismissal, and focus return.
+- Responsive profile, chat, members and IDE layouts around 390 pixels.
+
+Avatar/banner file imports and optional downloads were not exercised because no user-device files or storage were used. No live bot processes, Discord API calls, real account authentication, or durable backups were tested.
+
+## Published preview
+Cloud source: https://github.com/yoericwsg/unitClan-Discord-Bot/tree/unit-host-static/unit-host
+
+The deployment uses a free GitHack HTTPS URL. No custom domain was registered. Netlify requires connector reauthentication, and GitHub Pages settings were unavailable without browser sign-in.

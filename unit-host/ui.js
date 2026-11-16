@@ -40,9 +40,9 @@ export function textDownload(name,text,type='text/plain') {
 export async function copyText(text) {try{await navigator.clipboard.writeText(text);toast.success('Copied to clipboard');}catch{toast.error('Clipboard unavailable. Select and copy the text manually.');}}
 export function CodeEditor({value,language,onChange}) {
   const parent=useRef(null),view=useRef(null),latest=useRef(onChange),latestValue=useRef(value);
-  const [error,setError]=useState(false);latest.current=onChange;latestValue.current=value;
+  const [error,setError]=useState(false),[ready,setReady]=useState(false);latest.current=onChange;latestValue.current=value;
   useEffect(()=>{
-    let active=true;setError(false);
+    let active=true;setError(false);setReady(false);
     Promise.all([
       import('codemirror'),
       import('@codemirror/lang-javascript'),
@@ -60,13 +60,13 @@ export function CodeEditor({value,language,onChange}) {
         '.cm-scroller':{overflow:'auto'},'.cm-panels':{backgroundColor:'#202735',color:'#dce3ef'}
       },{dark:true});
       const extensions=[cm.basicSetup,cm.EditorView.contentAttributes.of({'aria-label':'Code editor'}),dark.oneDark,theme,language==='python'?py.python():js.javascript(),cm.EditorView.updateListener.of(update=>{if(update.docChanged)latest.current(update.state.doc.toString());})];
-      view.current=new cm.EditorView({doc:latestValue.current,extensions,parent:parent.current});
+      view.current=new cm.EditorView({doc:latestValue.current,extensions,parent:parent.current});setReady(true);
     }).catch(err=>{console.error('CodeMirror could not load',err);if(active)setError(true);});
     return()=>{active=false;view.current?.destroy();view.current=null;};
   },[language]);
   useEffect(()=>{if(view.current&&view.current.state.doc.toString()!==value)view.current.dispatch({changes:{from:0,to:view.current.state.doc.length,insert:value}});},[value]);
   if(error)return h('textarea',{className:'editor-fallback','aria-label':'Code editor',spellCheck:false,value,onChange:e=>onChange(e.target.value)});
-  return h('div',{className:'code-editor',ref:parent,'aria-label':'Code editor'});
+  return h('div',{className:'code-editor-shell'},!ready&&h('div',{className:'editor-loading',role:'status'},h(Icon,{name:'code',size:24}),h('span',null,'Loading the code editor…')),h('div',{className:'code-editor',ref:parent,'aria-label':'Code editor'}));
 }
 
 export function ResponsiveSidebar({open,onOpenChange,finalFocus,children}) {
